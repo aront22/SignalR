@@ -1,0 +1,10 @@
+<p>room works! {{id}}</p>
+<div class="row">
+    <div class="col-md-8" style="height: calc(100vh - 72px); overflow-y: auto">
+      <form class="form-group row" (ngSubmit)="sendMessage()" #sendMessageForm="ngForm">
+        <input required class="form-control col-8" [(ngModel)]="chatMessage" name="chatMessage" autocomplete="off" />
+        <button [disabled]="!sendMessageForm.valid" class="btn btn-primary col-4" type="submit">Send</button>
+      </form>
+      <app-chat-stream [messages]="roomMessages"></app-chat-stream>
+    </div>
+</div>

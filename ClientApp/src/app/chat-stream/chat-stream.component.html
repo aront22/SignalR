@@ -1,0 +1,18 @@
+<div *ngIf="messages != null; else loadingMessage" class="message-stream">
+  <div *ngFor="let message of messages" class="message {{isOwnMessage(message) ? 'recieved text-right' : 'sent'}}">
+    <div class="message-sender font-weight-light text-secondary" *ngIf="!isOwnMessage(message)">
+      {{message.senderName}}
+    </div>
+    <div class="h4">
+      <span class="rounded px-3 {{isOwnMessage(message) ? 'text-info bg-dark' : 'text-primary bg-light'}}">
+        {{message.text}}
+      </span>
+    </div>
+    <div class="message-sent-date font-weight-light text-muted">
+      {{message.postedDate | date: 'MMM dd HH:mm'}}
+    </div>
+  </div>
+</div>
+<ng-template #loadingMessage>
+  <h2 class="text-center">[ l o a d i n g . . . ]</h2>
+</ng-template>

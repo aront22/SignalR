@@ -1,0 +1,52 @@
+<div class="row">
+  <div class="col-md-8" style="height: calc(100vh - 72px); overflow-y: auto">
+    <form class="form-group row" (ngSubmit)="sendMessage()" #sendMessageForm="ngForm">
+      <input required class="form-control col-8" [(ngModel)]="chatMessage" name="chatMessage" autocomplete="off" />
+      <button [disabled]="!sendMessageForm.valid" class="btn btn-primary col-4" type="submit">Send</button>
+    </form>
+    <app-chat-stream [messages]="lobbyMessages"></app-chat-stream>
+  </div>
+  <div class="col-md-4">
+    <div class="row no-gutters">
+      <div class="col">
+        <a class="btn btn-primary w-100 rounded-0" [class.active]="activeTab === 'peeps'" (click)="activeTab='peeps'">Peeps ({{peeps === undefined ? '...' : peeps.length}})</a>
+      </div>
+      <div class="col">
+        <a class="btn btn-primary w-100 rounded-0" [class.active]="activeTab === 'rooms'" (click)="activeTab='rooms'">Rooms ({{rooms === undefined ? '...' : rooms.length}})</a>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="card">
+          <ul class="list-group list-group-flush">
+            <ng-container *ngIf="activeTab === 'peeps'">
+              <li *ngFor="let person of peeps" class="list-group-item">{{person.username}}</li>
+            </ng-container>
+            <ng-container *ngIf="activeTab === 'rooms'">
+              <li *ngFor="let room of rooms" class="list-group-item" (click)="enterRoom(room)">{{room.name}}</li>
+            </ng-container>
+          </ul>
+          <div *ngIf="activeTab === 'rooms'">
+            <hr />
+            <form class="text-center" #newRoomForm="ngForm" (ngSubmit)="createRoom()">
+              <div class="form-group">
+                <label for="newRoomName">Create your own room!</label>
+                <input required class="form-control" placeholder="Give a fancy name for the room..." [(ngModel)]="newRoomName" name="newRoomName" id="newRoomName" />
+              </div>
+              <div class="form-group form-check">
+                <input type="checkbox" class="form-check-input" [(ngModel)]="newRoomIsPrivate" name="newRoomIsPrivate" id="newRoomIsPrivate" />
+                <label for="newRoomIsPrivate">...but is it <i>private</i>?</label>
+              </div>
+              <div *ngIf="newRoomIsPrivate" class="form-group">
+                <label for="newRoomPasskey">Provide the secret passkey, then!</label>
+                <input required class="form-control" placeholder="Only who know the secret can enter..." [(ngModel)]="newRoomPasskey" name="newRoomPasskey" id="newRoomPasskey" />
+              </div>
+              <button type="submit" [disabled]="!newRoomForm.valid" class="btn btn-success w-100 m-1">Create it!</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
