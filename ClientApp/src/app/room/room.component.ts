@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Message, User } from '../models';
 import { HubBuilderService } from '../services/hub-builder.service.spec';
@@ -8,7 +8,7 @@ import { HubBuilderService } from '../services/hub-builder.service.spec';
   templateUrl: './room.component.html',
   styleUrls: ['./room.component.css']
 })
-export class RoomComponent implements OnInit {
+export class RoomComponent implements OnInit, OnDestroy {
   id: string;
 
   roomMessages: Message[];
@@ -28,11 +28,15 @@ export class RoomComponent implements OnInit {
     this.connection.on("UserEntered", user => this.userEntered(user));
     this.connection.on("UserLeft", userId => this.userLeft(userId));
     this.connection.on("SetMessages", messages => this.setMessages(messages));
-    this.connection.on("RecieveMessage", message => this.recieveMessage(message));
+    this.connection.on("RecieveRoomMessage", message => this.recieveMessage(message));
 
     this.roomMessages = [];
 
-    this.connection.start();
+    this.connection.start().then();
+    
+  }
+  ngOnDestroy(): void {
+   
   }
 
   ngOnInit() {
@@ -41,6 +45,7 @@ export class RoomComponent implements OnInit {
   recieveMessage(message: Message) {
     // A szerver új üzenet érkezését jelzi:
     this.roomMessages.splice(0, 0, message);
+    console.log(`[${this.id}] - ${message.senderName} : ${message.text}`);
   }
 
   userEntered(user: User) {
@@ -66,7 +71,8 @@ export class RoomComponent implements OnInit {
 
   sendMessage() {
     // A szervernek az invoke függvény meghívásával tudunk küldeni üzenetet.
-    this.connection.invoke("SendMessageToLobby", this.chatMessage);
+    this.connection.invoke("SendMessageToRoom", this.id, this.chatMessage);
+    console.log(`sending --- [${this.id}] - valaki : ${this.chatMessage}`);
     // A kérés szintén egy Promise, tehát feliratkoztathatnánk rá eseménykezelőt, ami akkor sül el, ha
     // a szerver jóváhagyta a kérést (vagy esetleg hibára futott). A szerver egyes metódusai Task
     // helyett Task<T>-vel is visszatérhetnek, ekkor a válasz eseménykezelőjében megkapjuk a válasz

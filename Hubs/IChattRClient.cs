@@ -9,6 +9,7 @@ namespace ChattR.Hubs
         Task UserEntered(User user);
         Task UserLeft(string userId);
         Task RecieveMessage(Message message);
+        Task RecieveRoomMessage(Message message);
         Task SetUsers(List<User> users);
         Task SetMessages(List<Message> messages);
 

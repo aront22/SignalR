@@ -49,13 +49,14 @@ export class LobbyComponent implements OnInit, OnDestroy {
   }
   ngOnInit() { /* A korábbi mock adatokat töröljük */ }
   ngOnDestroy() {
-
+    
   }
 
 
   recieveMessage(message: Message) {
     // A szerver új üzenet érkezését jelzi:
     this.lobbyMessages.splice(0, 0, message);
+    console.log(`[lobby] - ${message.senderName} : ${message.text}`);
   }
 
   userEntered(user: User) {

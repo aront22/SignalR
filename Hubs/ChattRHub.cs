@@ -98,8 +98,11 @@ namespace ChattR.Hubs
             await Clients.Group(LobbyRoomName).RecieveMessage(messageInstance);
         }
 
-        public async Task SendMessageToRoom(HubRoom room, string message)
+        public async Task SendMessageToRoom(string roomName, string message)
         {
+            if (!Rooms.TryGetValue(roomName, out var room))
+                throw new ArgumentException("Invalid room name");
+
             var messageInstance = new Message
             {
                 SenderId = CurrentUserId,
@@ -108,7 +111,7 @@ namespace ChattR.Hubs
                 PostedDate = DateTimeOffset.Now
             };
             room.Messages.Add(messageInstance);
-            await Clients.Group(room.Name).RecieveMessage(messageInstance);
+            await Clients.Group(room.Name).RecieveRoomMessage(messageInstance);
         }
 
         public async Task<Room> CreateRoom(string name, string passkey = "")
@@ -131,7 +134,10 @@ namespace ChattR.Hubs
                 Name = name,
                 RequiresPasskey = !string.IsNullOrEmpty(passkey)
             };
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, LobbyRoomName);
+            await Groups.AddToGroupAsync(Context.ConnectionId, r.Name);
             await Clients.Group(LobbyRoomName).RoomCreated(r);
+            await Clients.Group(r.Name).UserEntered(new User { Id = CurrentUserId, Username = Context.User.Identity.Name });
             return r;
         }
 
@@ -146,10 +152,12 @@ namespace ChattR.Hubs
             var user = new User { Id = CurrentUserId, Username = Context.User.Identity.Name };
             room.Users.Add(user);
             await Clients.Group(roomName).UserEntered(user);
+            await Clients.Group(LobbyRoomName).UserLeft(user.Id);
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, LobbyRoomName);
             await Groups.AddToGroupAsync(Context.ConnectionId, roomName);
             await Clients.Caller.SetUsers(room.Users);
             await Clients.Caller.SetMessages(room.Messages);
-            await SendMessageToRoom(room, $"{user.Username} has joined {room.Name}!");
+            await SendMessageToRoom(roomName, $"{user.Username} has joined {room.Name}!");
         }
     }
 }
